@@ -214,19 +214,167 @@ var object = new Object();
 var re = new RegExp("\\d+");
 ```  
 
-##### 1.4.1 Literal Forms
+##### 1.4.1 Literal Forms  
 
-##### 1.4.2 Object and Array Literals
+Several built-in reference types have literal forms. A literal is syntax that allows you to define a reference value without explicitly creating an object, using the new operator and the object’s constructor.  
 
-##### 1.4.3 Function Literals
+##### 1.4.2 Object and Array Literals  
 
-##### 1.4.4 Regular Expression Literals
+To create an object with object literal syntax, you can define the properties of a new object inside braces. Properties are made up of an identifier or string, a colon, and a value, with multiple properties separated by commas. For example:  
 
-#### 1.5.0 Property Access
+```js
+var book = {
+  name: "The Principles of Object-Oriented JavaScript",
+  year: 2014
+};
+```  
 
-#### 1.6.0 Identifying Reference Types
+You can also use string literals as property names, which is useful when you want a property name to have spaces or other special characters:  
 
-#### 1.7.0 Identifying Arrays
+```js
+var book = {
+"name": "The Principles of Object-Oriented JavaScript",
+"year": 2014
+};
+```  
+
+This example is equivalent to the previous one despite the syntactic differences. Both examples are also logically equivalent to the following:  
+
+```js
+var book = new Object();
+book.name = "The Principles of Object-Oriented JavaScript";
+book.year = 2014;
+```  
+
+The outcome of each of the previous three examples is the same:  
+*an object with two properties. The choice of pattern is up to you because the functionality is ultimately the same.*  
+
+**Using an object literal doesn’t actually call new Object(). Instead, the JavaScript engine follows the same steps it does when using new Object() without actually calling the constructor. This is true for all reference literals.**  
+
+You can define an array literal in a similar way by enclosing any number of comma-separated values inside square brackets. For example:  
+
+```js
+var colors = [ "red", "blue", "green" ];
+console.log(colors[0]); // "red"
+```  
+
+This code is equivalent to the following:  
+
+```js
+var colors = new Array("red", "blue", "green")
+console.log(colors[0]); // "red"
+```  
+
+##### 1.4.3 Function Literals  
+
+You almost always define functions using their literal form. In fact, using the `Function` constructor is typically discouraged given the challenges of maintaining, reading, and debugging a string of code rather than actual code, so you’ll rarely see it in code.  
+
+Creating functions is much easier and less error prone when you use the literal form. For example:  
+
+```js
+function reflect(value) {
+return value;
+}
+// is the same as
+var reflect = new Function("value", "return value;");
+```  
+
+This code defines the `reflect()` function, which returns any value passed to it. Even in the case of this simple function, the literal form is easier to write and understand than the constructor form.  
+
+Further, there is no good way to debug functions that are created in the constructor form:  
+
+These functions aren’t recognized by JavaScript debuggers and therefore act as a black box in your application.  
+
+##### 1.4.4 Regular Expression Literals  
+
+JavaScript also has regular expression literals that allow you to define regular expressions without using the `RegExp` constructor. Regular expression literals look very similar to regular expressions in Perl: The pattern is contained between two slashes, and any additional options are single characters following the second slash. For example:  
+
+```js
+var numbers = /\d+/g;
+// is the same as
+var numbers = new RegExp("\\d+", "g");
+```  
+
+The literal form of regular expressions in JavaScript is a bit easier to deal with than the constructor form because you don’t need to worry about escaping characters within strings. When using the RegExp constructor, you pass the pattern in as a string, so you have to escape any backslashes. (That’s why `\d` is used in the literal and `\\d` is used in the constructor.) Regular expression literals are preferred over the constructor form in JavaScript except when the regular expression is being constructed dynamically from one or more strings. That said, with the exception of Function, there really isn’t any right or wrong way to instantiate built-in types. Many developers prefer literals, while some prefer constructors. Choose whichever method you find more comfortable to use.
+
+#### 1.5.0 Property Access  
+
+Properties are name/value pairs that are stored on an object. Dot notation is the most common way to access properties in JavaScript (as in many object-oriented languages), but you can also access properties on JavaScript objects by using bracket notation with a string. For example, you could write this code, which uses dot notation:  
+
+```js
+var array = [];
+array.push(12345);
+```  
+
+With bracket notation, the name of the method is now included in a string enclosed by square brackets, as in this example:  
+
+```js
+var array = [];
+array["push"](12345);
+```  
+
+This syntax is very useful when you want to dynamically decide which property to access. For example, here bracket notation allows you to use a variable instead of the string literal to specify the property to access.  
+
+```js
+var array = [];
+var method = "push";
+array[method](12345);
+```  
+
+In this listing, the variable method has a value of `"push"`, so `push()` is called on the array. This capability is quite useful. The point to remember is that, other than syntax, the only difference—performance or otherwise—between dot notation and bracket notation is that bracket notation allows you to use special characters in property names. Developers tend to find dot notation easier to read, so you’ll see it used more frequently than bracket notation.  
+
+#### 1.6.0 Identifying Reference Types  
+
+A function is the easiest reference type to identify because when you use the typeof operator on a function, the operator should return `"function"`:  
+
+```js
+function reflect(value) {
+return value;
+}
+console.log(typeof reflect); // "function"
+```  
+
+Other reference types are trickier to identify because, for all reference types other than functions, typeof returns `"object"`. That’s not very helpful when you’re dealing with a lot of different types. To identify reference types more easily, you can use JavaScript’s `instanceof` operator. The `instanceof` operator takes an object and a constructor as parameters. When the value is an instance of the type that the constructor specifies, instanceof returns true; otherwise, it returns false, as you can see here:  
+
+```js
+var items = [];
+var object = {};
+function reflect(value) {
+return value;
+}
+console.log(items instanceof Array); // true
+console.log(object instanceof Object); // true
+console.log(reflect instanceof Function); // true
+```  
+
+In this example, several values are tested using instanceof and a constructor. Each reference type is correctly identified by using `instanceof` and the constructor that represents its true type (even though the constructor wasn’t used in creating the variable). The instanceof operator can identify inherited types. That means every object is actually an instance of Object because every reference type inherits from `Object`. To demonstrate, the following listing examines the three references previously created with `instanceof`:  
+
+```js
+var items = [];
+var object = {};
+function reflect(value) {
+return value;
+}
+console.log(items instanceof Array); // true
+console.log(items instanceof Object); // true
+console.log(object instanceof Object); // true
+console.log(object instanceof Array); // false
+console.log(reflect instanceof Function); // true
+console.log(reflect instanceof Object); // true
+```  
+
+Each reference type is correctly identified as an instance of Object, from which all reference types inherit.
+
+#### 1.7.0 Identifying Arrays  
+
+Although instanceof can identify arrays, there is one exception that affects web developers: JavaScript values can be passed back and forth between frames in the same web page. This becomes a problem only when you try to identify the type of a reference value, because each web page has its own global context—its own version of Object, Array, and all other builtin types. As a result, when you pass an array from one frame to another, instanceof doesn’t work because the array is actually an instance of Array from a different frame. To solve this problem, `ECMAScript 5` introduced `Array.isArray()`, which definitively identifies the value as an instance of Array regardless of the value’s origin. This method should return true when it receives a value that is a native array from any context. If your environment is `ECMAScript 5` compliant, `Array.isArray()` is the best way to identify arrays:  
+
+```js
+var items = [];
+console.log(Array.isArray(items)); // true
+```  
+
+The Array.isArray() method is supported in most environments, both in browsers and in Node.js. This method isn’t supported in Internet Explorer 8 and earlier.
 
 #### 1.8.0 Primitive Wrapper Types
 
